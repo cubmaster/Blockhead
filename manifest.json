@@ -1,0 +1,11 @@
+{
+  "id": "blockhead-calendar",
+  "name": "Blockhead Calendar",
+  "version": "1.0.0",
+  "minAppVersion": "0.15.0",
+  "description": "Display Microsoft 365 calendar entries in Obsidian",
+  "author": "Blockhead",
+  "authorUrl": "",
+  "fundingUrl": "",
+  "isDesktopOnly": false
+}
