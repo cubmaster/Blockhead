@@ -1,7 +1,7 @@
 {
   "name": "blockhead-calendar",
   "version": "1.0.0",
-  "description": "Obsidian plugin to display Microsoft Graph calendar entries",
+  "description": "Obsidian plugin to display calendar events and automatically schedule tasks in available time blocks using ICS feeds",
   "main": "main.js",
   "scripts": {
     "dev": "node esbuild.config.mjs",

@@ -3,7 +3,7 @@
   "name": "Blockhead Calendar",
   "version": "1.0.0",
   "minAppVersion": "0.15.0",
-  "description": "Display Microsoft 365 calendar entries in Obsidian",
+  "description": "Display calendar events and automatically schedule tasks in available time blocks using ICS feeds",
   "author": "Tad McClellan",
   "authorUrl": "https://github.com/cubmaster",
   "fundingUrl": "",
