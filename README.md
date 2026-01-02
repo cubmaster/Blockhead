@@ -84,6 +84,8 @@ Write tasks in your notes using checkboxes. The plugin supports two formats:
 - Tasks without scheduled times are auto-scheduled in next available 30-minute slots by priority
 - All tasks appear as blocks on the calendar alongside your events
 - The calendar automatically scans all markdown files for tasks
+- **Real-time Updates**: When you complete a task (check the box), it's automatically removed from the calendar within 500ms
+- **Auto-Reprioritization**: Remaining tasks are automatically rescheduled to fill the newly available time slot
 
 **To Schedule Manually:**
 1. Write your tasks in a note
@@ -98,11 +100,19 @@ Write tasks in your notes using checkboxes. The plugin supports two formats:
 
 ## How Task Scheduling Works
 
-1. **Parses Tasks**: Reads checkboxes from your current note
+1. **Parses Tasks**: Reads unchecked tasks (`- [ ]`) from all markdown files
 2. **Finds Free Time**: Analyzes your calendar to find available slots
 3. **Prioritizes**: Schedules high-priority tasks first
 4. **Respects Due Dates**: Won't schedule tasks after their due date
 5. **Smart Blocking**: Fills available time between meetings
+6. **Live Updates**: Monitors file changes and automatically updates the calendar
+7. **Auto-Reprioritization**: When you complete a task, remaining tasks are automatically rescheduled
+
+### Task Completion Behavior
+
+- ✅ **Check a task**: Automatically removed from calendar within 500ms
+- 🔄 **Remaining tasks**: Automatically reprioritized and rescheduled
+- 📊 **Only uncompleted tasks show**: Completed tasks (`- [x]`) never appear on the calendar
 
 Example output:
 

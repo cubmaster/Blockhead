@@ -14,6 +14,7 @@ export class CalendarView extends ItemView {
     private currentViewMode: ViewMode = 'day';
     private currentDate: Date = new Date();
     private scheduledTasks: ScheduledTask[] = [];
+    private debounceTimer: number | null = null;
 
     constructor(leaf: WorkspaceLeaf, calendarService: CalendarService, taskScheduler: TaskScheduler) {
         super(leaf);
@@ -36,16 +37,36 @@ export class CalendarView extends ItemView {
     async onOpen(): Promise<void> {
         await this.renderView();
 
-        // Auto-refresh every 5 minutes
+        // Auto-refresh every 5 minutes for calendar events
         this.refreshInterval = window.setInterval(async () => {
             await this.renderView();
         }, 5 * 60 * 1000);
+
+        // Watch for file changes to detect task completion/modification
+        this.registerEvent(
+            this.app.vault.on('modify', async (file: TFile) => {
+                // Only react to markdown files
+                if (file.extension === 'md') {
+                    // Debounce to avoid too many refreshes during rapid edits
+                    if (this.debounceTimer) {
+                        window.clearTimeout(this.debounceTimer);
+                    }
+                    this.debounceTimer = window.setTimeout(async () => {
+                        await this.renderView();
+                    }, 500); // Wait 500ms after last change
+                }
+            })
+        );
     }
 
     async onClose(): Promise<void> {
         if (this.refreshInterval) {
             window.clearInterval(this.refreshInterval);
         }
+        if (this.debounceTimer) {
+            window.clearTimeout(this.debounceTimer);
+        }
+        // Event handlers are automatically unregistered via registerEvent
     }
 
     async renderView(): Promise<void> {
@@ -98,12 +119,24 @@ export class CalendarView extends ItemView {
 
     /**
      * Load tasks from all markdown files and schedule them
+     *
+     * This method:
+     * 1. Scans all markdown files for unchecked tasks (- [ ])
+     * 2. Automatically excludes completed tasks (- [x])
+     * 3. Schedules remaining tasks by priority and due date
+     * 4. Fills available time slots between calendar events
+     *
+     * Called whenever:
+     * - View is opened or refreshed
+     * - Any markdown file is modified (with 500ms debounce)
+     * - Every 5 minutes (auto-refresh)
      */
     private async loadAndScheduleTasks(events: CalendarEvent[]): Promise<void> {
         const allTasks: any[] = [];
         const markdownFiles = this.app.vault.getMarkdownFiles();
 
         // Parse tasks from all markdown files
+        // Only unchecked tasks (- [ ]) are parsed; completed tasks (- [x]) are ignored
         for (const file of markdownFiles) {
             try {
                 const content = await this.app.vault.read(file);
@@ -114,7 +147,8 @@ export class CalendarView extends ItemView {
             }
         }
 
-        // Schedule the tasks
+        // Schedule the tasks with automatic reprioritization
+        // Tasks are sorted by priority (1=highest) and due date, then scheduled in available slots
         if (allTasks.length > 0) {
             this.scheduledTasks = this.taskScheduler.scheduleTasks(
                 allTasks,
